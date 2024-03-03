@@ -16,11 +16,24 @@ class TestCreateAPIView(generics.CreateAPIView):
 
 class TestListAPIView(generics.ListAPIView):
     serializer_class = s.TestSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         course_id = self.kwargs.get('pk')
         queryset = m.Test.objects.filter(course=course_id)
         return queryset
+
+    def get(self, request, *args, **kwargs):
+        course_id = self.kwargs.get('pk')
+        tests = m.Test.objects.filter(course=course_id)
+        user = request.user
+
+        for test in tests:
+            if m.TestUser.objects.filter(test=test, user=user).exists():
+                return Response({'message': 'вы уже прошли этот тест'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(tests, many=True)
+        return Response(serializer.data)
 
 
 class TestDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
