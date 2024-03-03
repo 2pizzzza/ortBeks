@@ -30,7 +30,7 @@ class TestListAPIView(generics.ListAPIView):
 
         for test in tests:
             if m.TestUser.objects.filter(test=test, user=user).exists():
-                return Response({'message': 'вы уже прошли этот тест'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'вы уже прошли этот тест'})
 
         serializer = self.get_serializer(tests, many=True)
         return Response(serializer.data)
